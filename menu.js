@@ -1,6 +1,6 @@
-'use strict';
-const path = require('path');
-const {app, Menu, shell} = require('electron');
+"use strict";
+const path = require("path");
+const { app, Menu, shell } = require("electron");
 const {
 	is,
 	appMenu,
@@ -8,8 +8,8 @@ const {
 	openUrlMenuItem,
 	openNewGitHubIssue,
 	debugInfo,
-} = require('electron-util');
-const config = require('./config.js');
+} = require("electron-util");
+const config = require("./config.js");
 
 const showPreferences = () => {
 	// Show the app's preferences here
@@ -17,15 +17,15 @@ const showPreferences = () => {
 
 const helpSubmenu = [
 	openUrlMenuItem({
-		label: 'Website',
-		url: 'https://github.com/sindresorhus/electron-boilerplate',
+		label: "Website",
+		url: "https://github.com/sindresorhus/electron-boilerplate",
 	}),
 	openUrlMenuItem({
-		label: 'Source Code',
-		url: 'https://github.com/sindresorhus/electron-boilerplate',
+		label: "Source Code",
+		url: "https://github.com/sindresorhus/electron-boilerplate",
 	}),
 	{
-		label: 'Report an Issue…',
+		label: "Report an Issue…",
 		click() {
 			const body = `
 <!-- Please succinctly describe your issue and steps to reproduce it. -->
@@ -36,8 +36,8 @@ const helpSubmenu = [
 ${debugInfo()}`;
 
 			openNewGitHubIssue({
-				user: 'sindresorhus',
-				repo: 'electron-boilerplate',
+				user: "sindresorhus",
+				repo: "electron-boilerplate",
 				body,
 			});
 		},
@@ -47,33 +47,37 @@ ${debugInfo()}`;
 if (!is.macos) {
 	helpSubmenu.push(
 		{
-			type: 'separator',
+			type: "separator",
 		},
 		aboutMenuItem({
-			icon: path.join(__dirname, 'static', 'icon.png'),
-			text: 'Created by Your Name',
-		}),
+			icon: path.join(__dirname, "static", "icon.png"),
+			text: "Created by Your Name",
+		})
 	);
 }
 
 const debugSubmenu = [
 	{
-		label: 'Show Settings',
+		label: "Show Settings",
 		click() {
 			config.openInEditor();
 		},
 	},
 	{
-		label: 'Show App Data',
-		click() {
-			shell.openItem(app.getPath('userData'));
+		label: "Show App Data",
+		async click() {
+			try {
+				await shell.openPath(app.getPath("userData"));
+			} catch (error) {
+				console.error("Failed to open app data directory:", error);
+			}
 		},
 	},
 	{
-		type: 'separator',
+		type: "separator",
 	},
 	{
-		label: 'Delete Settings',
+		label: "Delete Settings",
 		click() {
 			config.clear();
 			app.relaunch();
@@ -81,11 +85,15 @@ const debugSubmenu = [
 		},
 	},
 	{
-		label: 'Delete App Data',
-		click() {
-			shell.moveItemToTrash(app.getPath('userData'));
-			app.relaunch();
-			app.quit();
+		label: "Delete App Data",
+		async click() {
+			try {
+				await shell.trashItem(app.getPath("userData"));
+				app.relaunch();
+				app.quit();
+			} catch (error) {
+				console.error("Failed to move app data to trash:", error);
+			}
 		},
 	},
 ];
@@ -93,38 +101,38 @@ const debugSubmenu = [
 const macosTemplate = [
 	appMenu([
 		{
-			label: 'Preferences…',
-			accelerator: 'Command+,',
+			label: "Preferences…",
+			accelerator: "Command+,",
 			click() {
 				showPreferences();
 			},
 		},
 	]),
 	{
-		role: 'fileMenu',
+		role: "fileMenu",
 		submenu: [
 			{
-				label: 'Custom',
+				label: "Custom",
 			},
 			{
-				type: 'separator',
+				type: "separator",
 			},
 			{
-				role: 'close',
+				role: "close",
 			},
 		],
 	},
 	{
-		role: 'editMenu',
+		role: "editMenu",
 	},
 	{
-		role: 'viewMenu',
+		role: "viewMenu",
 	},
 	{
-		role: 'windowMenu',
+		role: "windowMenu",
 	},
 	{
-		role: 'help',
+		role: "help",
 		submenu: helpSubmenu,
 	},
 ];
@@ -132,37 +140,37 @@ const macosTemplate = [
 // Linux and Windows
 const otherTemplate = [
 	{
-		role: 'fileMenu',
+		role: "fileMenu",
 		submenu: [
 			{
-				label: 'Custom',
+				label: "Custom",
 			},
 			{
-				type: 'separator',
+				type: "separator",
 			},
 			{
-				label: 'Settings',
-				accelerator: 'Control+,',
+				label: "Settings",
+				accelerator: "Control+,",
 				click() {
 					showPreferences();
 				},
 			},
 			{
-				type: 'separator',
+				type: "separator",
 			},
 			{
-				role: 'quit',
+				role: "quit",
 			},
 		],
 	},
 	{
-		role: 'editMenu',
+		role: "editMenu",
 	},
 	{
-		role: 'viewMenu',
+		role: "viewMenu",
 	},
 	{
-		role: 'help',
+		role: "help",
 		submenu: helpSubmenu,
 	},
 ];
@@ -171,7 +179,7 @@ const template = is.macos ? macosTemplate : otherTemplate;
 
 if (is.development) {
 	template.push({
-		label: 'Debug',
+		label: "Debug",
 		submenu: debugSubmenu,
 	});
 }
