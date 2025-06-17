@@ -1,0 +1,76 @@
+{
+	"name": "llm-installer-desktop-app",
+	"productName": "MyLLM",
+	"version": "0.0.0",
+	"description": "Run LLMs locally based on local system requirements",
+	"license": "Commercial",
+	"repository": "",
+	"author": {
+		"name": "Sundeep Kumar"
+	},
+	"scripts": {
+		"postinstall": "electron-builder install-app-deps",
+		"lint": "xo",
+		"test": "npm run lint",
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"dist": "electron-builder --macos --linux --windows",
+		"release": "np"
+	},
+	"dependencies": {
+		"electron-context-menu": "^3.4.0",
+		"electron-debug": "^3.2.0",
+		"electron-store": "^8.1.0",
+		"electron-unhandled": "^4.0.1",
+		"electron-updater": "^5.2.1",
+		"electron-util": "^0.17.2"
+	},
+	"devDependencies": {
+		"electron": "^13.0.0",
+		"electron-builder": "^23.3.3",
+		"np": "^7.6.2",
+		"xo": "^0.51.0"
+	},
+	"xo": {
+		"envs": [
+			"node",
+			"browser"
+		],
+		"rules": {
+			"unicorn/prefer-module": "off"
+		}
+	},
+	"np": {
+		"publish": false,
+		"releaseDraft": false
+	},
+	"build": {
+		"appId": "MyLLM",
+		"mac": {
+			"category": "public.app-category.desktop",
+			"darkModeSupport": true
+		},
+		"dmg": {
+			"iconSize": 160,
+			"contents": [
+				{
+					"x": 180,
+					"y": 170
+				},
+				{
+					"x": 480,
+					"y": 170,
+					"type": "link",
+					"path": "/Applications"
+				}
+			]
+		},
+		"linux": {
+			"target": [
+				"AppImage",
+				"deb"
+			],
+			"category": "desktop;Chat"
+		}
+	}
+}
