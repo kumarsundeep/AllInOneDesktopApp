@@ -18,11 +18,11 @@ const showPreferences = () => {
 const helpSubmenu = [
 	openUrlMenuItem({
 		label: "Website",
-		url: "https://github.com/sindresorhus/electron-boilerplate",
+		url: "https://github.com/kumarsundeep/AllInOneDesktopApp",
 	}),
 	openUrlMenuItem({
 		label: "Source Code",
-		url: "https://github.com/sindresorhus/electron-boilerplate",
+		url: "https://github.com/kumarsundeep/AllInOneDesktopApp",
 	}),
 	{
 		label: "Report an Issue…",
@@ -36,8 +36,8 @@ const helpSubmenu = [
 ${debugInfo()}`;
 
 			openNewGitHubIssue({
-				user: "sindresorhus",
-				repo: "electron-boilerplate",
+				user: "kumarsundeep",
+				repo: "AllInOneDesktopApp",
 				body,
 			});
 		},
