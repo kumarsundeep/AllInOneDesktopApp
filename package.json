@@ -1,10 +1,10 @@
 {
-	"name": "llm-installer-desktop-app",
-	"productName": "MyLLM",
+	"name": "all-in-one-desktop-app",
+	"productName": "MyAPP",
 	"version": "0.0.0",
-	"description": "Run LLMs locally based on local system requirements",
-	"license": "Commercial",
-	"repository": "",
+	"description": "Generates production ready .exe, .dmg, .deb, etc. from a single codebase",
+	"license": "MIT",
+	"repository": "kumarsundeep/AllInOneDesktopApp",
 	"author": {
 		"name": "Sundeep Kumar"
 	},
