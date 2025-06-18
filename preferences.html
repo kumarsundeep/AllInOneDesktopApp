@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Preferences</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .preferences-container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .preference-item {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="preferences-container">
+        <h2>Application Preferences</h2>
+        
+        <div class="preference-item">
+            <label for="theme">Theme:</label>
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="system">System Default</option>
+            </select>
+        </div>
+        
+        <div class="preference-item">
+            <label for="autoupdate">Automatic Updates:</label>
+            <select id="autoupdate">
+                <option value="enabled">Enabled</option>
+                <option value="disabled">Disabled</option>
+            </select>
+        </div>
+        
+        <div class="actions">
+            <button id="cancel-btn">Cancel</button>
+            <button id="save-btn">Save Preferences</button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        // Load saved preferences
+        ipcRenderer.invoke('get-preferences').then(prefs => {
+            if (prefs.theme) document.getElementById('theme').value = prefs.theme;
+            if (prefs.autoUpdate) document.getElementById('autoupdate').value = prefs.autoUpdate;
+        });
+        
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const preferences = {
+                theme: document.getElementById('theme').value,
+                autoUpdate: document.getElementById('autoupdate').value
+            };
+            ipcRenderer.send('save-preferences', preferences);
+            window.close();
+        });
+        
+        document.getElementById('cancel-btn').addEventListener('click', () => {
+            window.close();
+        });
+    </script>
+</body>
+</html>

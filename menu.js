@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-const { app, Menu, shell } = require('electron');
+const { app, Menu, shell, BrowserWindow } = require('electron');
 const {
   is,
   appMenu,
@@ -11,8 +11,31 @@ const {
 } = require('electron-util');
 const config = require('./config.js');
 
+let preferencesWindow = null;
+
 const showPreferences = () => {
-  // Show the app's preferences here
+  if (preferencesWindow) {
+    preferencesWindow.focus();
+    return;
+  }
+
+  preferencesWindow = new BrowserWindow({
+    width: 600,
+    height: 400,
+    parent: BrowserWindow.getFocusedWindow(),
+    modal: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  preferencesWindow.loadFile(path.join(__dirname, 'preferences.html'));
+
+  preferencesWindow.on('closed', () => {
+    preferencesWindow = null;
+  });
 };
 
 const helpSubmenu = [
@@ -149,7 +172,7 @@ const otherTemplate = [
         type: 'separator',
       },
       {
-        label: 'Settings',
+        label: 'Preferences…',
         accelerator: 'Control+,',
         click() {
           showPreferences();

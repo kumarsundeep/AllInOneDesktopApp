@@ -3,7 +3,7 @@
 require('dotenv').config();
 
 const path = require('path');
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const { is } = require('electron-util');
 const unhandled = require('electron-unhandled');
@@ -81,7 +81,15 @@ const createMainWindow = async () => {
     mainWindow = undefined;
   });
 
-  await window_.loadFile(path.join(__dirname, 'index.html'));
+  try {
+    await window_.loadFile(path.join(__dirname, 'index.html'));
+  } catch (err) {
+    console.error('Failed to load index.html:', err);
+    // Fallback to showing an error page
+    await window_.loadURL(
+      `data:text/html,<h1>Failed to load application</h1><p>${err.message}</p>`
+    );
+  }
 
   return window_;
 };
@@ -115,8 +123,23 @@ app.on('activate', async () => {
 
 (async () => {
   await app.whenReady();
-  Menu.setApplicationMenu(menu);
+  // Set application menu after creating main window
+  const appMenu = menu; // Ensure menu is built
+  Menu.setApplicationMenu(appMenu);
   mainWindow = await createMainWindow();
+
+  // Add IPC handlers for preferences
+  ipcMain.handle('get-preferences', () => {
+    return {
+      theme: config.get('theme', 'system'),
+      autoUpdate: config.get('autoUpdate', 'enabled'),
+    };
+  });
+
+  ipcMain.on('save-preferences', (event, prefs) => {
+    config.set('theme', prefs.theme);
+    config.set('autoUpdate', prefs.autoUpdate);
+  });
 
   const fallbackErr = config.get('fallbackErr');
   // Sanitize user input by escaping HTML special characters
