@@ -1,7 +1,10 @@
 "use strict";
+// Load environment variables
+require("dotenv").config();
+
 const path = require("path");
 const { app, BrowserWindow, Menu } = require("electron");
-/// const {autoUpdater} = require('electron-updater');
+const { autoUpdater } = require("electron-updater");
 const { is } = require("electron-util");
 const unhandled = require("electron-unhandled");
 const debug = require("electron-debug");
@@ -16,16 +19,41 @@ contextMenu();
 // Note: Must match `build.appId` in package.json
 app.setAppUserModelId("com.company.AppName");
 
-// Uncomment this before publishing your first version.
-// It's commented out as it throws an error if there are no published versions.
-// if (!is.development) {
-// 	const FOUR_HOURS = 1000 * 60 * 60 * 4;
-// 	setInterval(() => {
-// 		autoUpdater.checkForUpdates();
-// 	}, FOUR_HOURS);
-//
-// 	autoUpdater.checkForUpdates();
-// }
+// Enable auto-updates with certificate pinning in production
+if (!is.development) {
+	const FOUR_HOURS = 1000 * 60 * 60 * 4;
+
+	// Certificate pinning configuration from environment variables
+	autoUpdater.publisherName = process.env.PUBLISHER_NAME;
+	autoUpdater.verifyUpdateCodeSignature = true;
+
+	// Add certificate fingerprints from environment variables
+	const pinnedFingerprints = new Set();
+	if (process.env.CERTIFICATE_FINGERPRINT_1)
+		pinnedFingerprints.add(process.env.CERTIFICATE_FINGERPRINT_1);
+	if (process.env.CERTIFICATE_FINGERPRINT_2)
+		pinnedFingerprints.add(process.env.CERTIFICATE_FINGERPRINT_2);
+
+	// Verify update signature against pinned fingerprints
+	autoUpdater.on(
+		"update-downloaded",
+		(event, releaseNotes, releaseName, releaseDate, updateURL) => {
+			const cert = event.certificates && event.certificates[0];
+			if (cert && pinnedFingerprints.has(cert.fingerprint256)) {
+				autoUpdater.quitAndInstall();
+			} else {
+				console.error("Certificate verification failed");
+				// Handle invalid certificate (e.g., show error to user)
+			}
+		}
+	);
+
+	setInterval(() => {
+		autoUpdater.checkForUpdates();
+	}, FOUR_HOURS);
+
+	autoUpdater.checkForUpdates();
+}
 
 // Prevent window from being garbage collected
 let mainWindow;
