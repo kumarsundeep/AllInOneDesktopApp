@@ -90,9 +90,9 @@ app.on("activate", async () => {
 	Menu.setApplicationMenu(menu);
 	mainWindow = await createMainWindow();
 
-	const favoriteAnimal = config.get("favoriteAnimal");
+	const fallbackErr = config.get("fallbackErr");
 	// Sanitize user input by escaping HTML special characters
-	const sanitizedText = favoriteAnimal
+	const sanitizedText = fallbackErr
 		.replace(/&/g, "&")
 		.replace(/</g, "<")
 		.replace(/>/g, ">")
@@ -101,6 +101,6 @@ app.on("activate", async () => {
 
 	mainWindow.webContents.send(
 		"set-header-text",
-		`Your favorite animal is ${sanitizedText}`
+		`Something went wrong! ${sanitizedText}`
 	);
 })();
