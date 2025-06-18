@@ -1,77 +1,69 @@
 {
-	"name": "all-in-one-desktop-app",
-	"productName": "MyAPP",
-	"version": "0.0.0",
-	"description": "Generates production ready .exe, .dmg, .deb, etc. from a single codebase",
-	"license": "MIT",
-	"repository": "kumarsundeep/AllInOneDesktopApp",
-	"author": {
-		"name": "Sundeep Kumar"
-	},
-	"scripts": {
-		"postinstall": "electron-builder install-app-deps",
-		"lint": "xo",
-		"test": "npm run lint",
-		"start": "electron .",
-		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --linux --windows",
-		"release": "np"
-	},
-	"dependencies": {
-		"dotenv": "^16.4.5",
-		"electron-context-menu": "^3.4.0",
-		"electron-debug": "^3.2.0",
-		"electron-store": "^8.1.0",
-		"electron-unhandled": "^4.0.1",
-		"electron-updater": "^6.1.7",
-		"electron-util": "^0.17.2"
-	},
-	"devDependencies": {
-		"electron": "^28.0.0",
-		"electron-builder": "^24.9.1",
-		"np": "^7.6.2",
-		"xo": "^0.51.0"
-	},
-	"xo": {
-		"envs": [
-			"node",
-			"browser"
-		],
-		"rules": {
-			"unicorn/prefer-module": "off"
-		}
-	},
-	"np": {
-		"publish": false,
-		"releaseDraft": false
-	},
-	"build": {
-		"appId": "MyLLM",
-		"mac": {
-			"category": "public.app-category.desktop",
-			"darkModeSupport": true
-		},
-		"dmg": {
-			"iconSize": 160,
-			"contents": [
-				{
-					"x": 180,
-					"y": 170
-				},
-				{
-					"x": 480,
-					"y": 170,
-					"type": "link",
-					"path": "/Applications"
-				}
-			]
-		},
-		"linux": {
-			"target": [
-				"AppImage",
-				"deb"
-			],
-			"category": "desktop;Chat"
-		}
-	}
+  "name": "all-in-one-desktop-app",
+  "productName": "MyAPP",
+  "version": "0.0.0",
+  "description": "Generates production ready .exe, .dmg, .deb, etc. from a single codebase",
+  "license": "MIT",
+  "repository": "kumarsundeep/AllInOneDesktopApp",
+  "author": {
+    "name": "Sundeep Kumar"
+  },
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "npm run lint && npm run format",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --macos --linux --windows",
+    "release": "np"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "electron-context-menu": "^3.4.0",
+    "electron-debug": "^3.2.0",
+    "electron-store": "^8.1.0",
+    "electron-unhandled": "^4.0.1",
+    "electron-updater": "^6.1.7",
+    "electron-util": "^0.17.2"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "np": "^7.6.2",
+    "xo": "^0.58.0"
+  },
+  "np": {
+    "publish": false,
+    "releaseDraft": false
+  },
+  "build": {
+    "appId": "MyLLM",
+    "mac": {
+      "category": "public.app-category.desktop",
+      "darkModeSupport": true
+    },
+    "dmg": {
+      "iconSize": 160,
+      "contents": [
+        {
+          "x": 180,
+          "y": 170
+        },
+        {
+          "x": 480,
+          "y": 170,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "desktop;Chat"
+    }
+  }
 }

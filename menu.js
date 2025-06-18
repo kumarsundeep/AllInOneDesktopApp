@@ -1,33 +1,33 @@
-"use strict";
-const path = require("path");
-const { app, Menu, shell } = require("electron");
+'use strict';
+const path = require('path');
+const { app, Menu, shell } = require('electron');
 const {
-	is,
-	appMenu,
-	aboutMenuItem,
-	openUrlMenuItem,
-	openNewGitHubIssue,
-	debugInfo,
-} = require("electron-util");
-const config = require("./config.js");
+  is,
+  appMenu,
+  aboutMenuItem,
+  openUrlMenuItem,
+  openNewGitHubIssue,
+  debugInfo,
+} = require('electron-util');
+const config = require('./config.js');
 
 const showPreferences = () => {
-	// Show the app's preferences here
+  // Show the app's preferences here
 };
 
 const helpSubmenu = [
-	openUrlMenuItem({
-		label: "Website",
-		url: "https://github.com/kumarsundeep/AllInOneDesktopApp",
-	}),
-	openUrlMenuItem({
-		label: "Source Code",
-		url: "https://github.com/kumarsundeep/AllInOneDesktopApp",
-	}),
-	{
-		label: "Report an Issue…",
-		click() {
-			const body = `
+  openUrlMenuItem({
+    label: 'Website',
+    url: 'https://github.com/kumarsundeep/AllInOneDesktopApp',
+  }),
+  openUrlMenuItem({
+    label: 'Source Code',
+    url: 'https://github.com/kumarsundeep/AllInOneDesktopApp',
+  }),
+  {
+    label: 'Report an Issue…',
+    click() {
+      const body = `
 <!-- Please succinctly describe your issue and steps to reproduce it. -->
 
 
@@ -35,153 +35,153 @@ const helpSubmenu = [
 
 ${debugInfo()}`;
 
-			openNewGitHubIssue({
-				user: "kumarsundeep",
-				repo: "AllInOneDesktopApp",
-				body,
-			});
-		},
-	},
+      openNewGitHubIssue({
+        user: 'kumarsundeep',
+        repo: 'AllInOneDesktopApp',
+        body,
+      });
+    },
+  },
 ];
 
 if (!is.macos) {
-	helpSubmenu.push(
-		{
-			type: "separator",
-		},
-		aboutMenuItem({
-			icon: path.join(__dirname, "static", "icon.png"),
-			text: "Created by __",
-		})
-	);
+  helpSubmenu.push(
+    {
+      type: 'separator',
+    },
+    aboutMenuItem({
+      icon: path.join(__dirname, 'static', 'icon.png'),
+      text: 'Created by __',
+    })
+  );
 }
 
 const debugSubmenu = [
-	{
-		label: "Show Settings",
-		click() {
-			config.openInEditor();
-		},
-	},
-	{
-		label: "Show App Data",
-		async click() {
-			try {
-				await shell.openPath(app.getPath("userData"));
-			} catch (error) {
-				console.error("Failed to open app data directory:", error);
-			}
-		},
-	},
-	{
-		type: "separator",
-	},
-	{
-		label: "Delete Settings",
-		click() {
-			config.clear();
-			app.relaunch();
-			app.quit();
-		},
-	},
-	{
-		label: "Delete App Data",
-		async click() {
-			try {
-				await shell.trashItem(app.getPath("userData"));
-				app.relaunch();
-				app.quit();
-			} catch (error) {
-				console.error("Failed to move app data to trash:", error);
-			}
-		},
-	},
+  {
+    label: 'Show Settings',
+    click() {
+      config.openInEditor();
+    },
+  },
+  {
+    label: 'Show App Data',
+    async click() {
+      try {
+        await shell.openPath(app.getPath('userData'));
+      } catch (error) {
+        console.error('Failed to open app data directory:', error);
+      }
+    },
+  },
+  {
+    type: 'separator',
+  },
+  {
+    label: 'Delete Settings',
+    click() {
+      config.clear();
+      app.relaunch();
+      app.quit();
+    },
+  },
+  {
+    label: 'Delete App Data',
+    async click() {
+      try {
+        await shell.trashItem(app.getPath('userData'));
+        app.relaunch();
+        app.quit();
+      } catch (error) {
+        console.error('Failed to move app data to trash:', error);
+      }
+    },
+  },
 ];
 
 const macosTemplate = [
-	appMenu([
-		{
-			label: "Preferences…",
-			accelerator: "Command+,",
-			click() {
-				showPreferences();
-			},
-		},
-	]),
-	{
-		role: "fileMenu",
-		submenu: [
-			{
-				label: "Custom",
-			},
-			{
-				type: "separator",
-			},
-			{
-				role: "close",
-			},
-		],
-	},
-	{
-		role: "editMenu",
-	},
-	{
-		role: "viewMenu",
-	},
-	{
-		role: "windowMenu",
-	},
-	{
-		role: "help",
-		submenu: helpSubmenu,
-	},
+  appMenu([
+    {
+      label: 'Preferences…',
+      accelerator: 'Command+,',
+      click() {
+        showPreferences();
+      },
+    },
+  ]),
+  {
+    role: 'fileMenu',
+    submenu: [
+      {
+        label: 'Custom',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        role: 'close',
+      },
+    ],
+  },
+  {
+    role: 'editMenu',
+  },
+  {
+    role: 'viewMenu',
+  },
+  {
+    role: 'windowMenu',
+  },
+  {
+    role: 'help',
+    submenu: helpSubmenu,
+  },
 ];
 
 // Linux and Windows
 const otherTemplate = [
-	{
-		role: "fileMenu",
-		submenu: [
-			{
-				label: "Custom",
-			},
-			{
-				type: "separator",
-			},
-			{
-				label: "Settings",
-				accelerator: "Control+,",
-				click() {
-					showPreferences();
-				},
-			},
-			{
-				type: "separator",
-			},
-			{
-				role: "quit",
-			},
-		],
-	},
-	{
-		role: "editMenu",
-	},
-	{
-		role: "viewMenu",
-	},
-	{
-		role: "help",
-		submenu: helpSubmenu,
-	},
+  {
+    role: 'fileMenu',
+    submenu: [
+      {
+        label: 'Custom',
+      },
+      {
+        type: 'separator',
+      },
+      {
+        label: 'Settings',
+        accelerator: 'Control+,',
+        click() {
+          showPreferences();
+        },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        role: 'quit',
+      },
+    ],
+  },
+  {
+    role: 'editMenu',
+  },
+  {
+    role: 'viewMenu',
+  },
+  {
+    role: 'help',
+    submenu: helpSubmenu,
+  },
 ];
 
 const template = is.macos ? macosTemplate : otherTemplate;
 
 if (is.development) {
-	template.push({
-		label: "Debug",
-		submenu: debugSubmenu,
-	});
+  template.push({
+    label: 'Debug',
+    submenu: debugSubmenu,
+  });
 }
 
 module.exports = Menu.buildFromTemplate(template);
