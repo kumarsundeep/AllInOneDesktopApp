@@ -19,8 +19,12 @@ contextMenu();
 // Note: Must match `build.appId` in package.json
 app.setAppUserModelId('com.company.AppName');
 
-// Enable auto-updates with certificate pinning in production
-if (!is.development) {
+// Enable auto-updates with certificate pinning
+if (!is.development || process.argv.includes('--test-update')) {
+  // Override auto-updater config for testing
+  if (process.argv.includes('--test-update')) {
+    autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml');
+  }
   const FOUR_HOURS = 1000 * 60 * 60 * 4;
 
   // Certificate pinning configuration from environment variables
