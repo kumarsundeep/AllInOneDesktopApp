@@ -1,6 +1,6 @@
-import { fileURLToPath } from 'url';
-import path from 'path';
-import { app, Menu, shell, BrowserWindow } from 'electron';
+import { fileURLToPath } from 'url'
+import path from 'path'
+import { app, Menu, shell, BrowserWindow } from 'electron'
 import {
   is,
   appMenu,
@@ -8,19 +8,19 @@ import {
   openUrlMenuItem,
   openNewGitHubIssue,
   debugInfo,
-} from 'electron-util';
-import config from './config.js';
+} from 'electron-util'
+import config from './config.js'
 
 // Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-let preferencesWindow = null;
+let preferencesWindow = null
 
 const showPreferences = () => {
   if (preferencesWindow) {
-    preferencesWindow.focus();
-    return;
+    preferencesWindow.focus()
+    return
   }
 
   preferencesWindow = new BrowserWindow({
@@ -33,14 +33,14 @@ const showPreferences = () => {
       contextIsolation: true,
       nodeIntegration: false,
     },
-  });
+  })
 
-  preferencesWindow.loadFile(path.join(__dirname, 'preferences.html'));
+  preferencesWindow.loadFile(path.join(__dirname, 'preferences.html'))
 
   preferencesWindow.on('closed', () => {
-    preferencesWindow = null;
-  });
-};
+    preferencesWindow = null
+  })
+}
 
 const helpSubmenu = [
   openUrlMenuItem({
@@ -60,16 +60,16 @@ const helpSubmenu = [
 
 ---
 
-${debugInfo()}`;
+${debugInfo()}`
 
       openNewGitHubIssue({
         user: 'kumarsundeep',
         repo: 'AllInOneDesktopApp',
         body,
-      });
+      })
     },
   },
-];
+]
 
 if (!is.macos) {
   helpSubmenu.push(
@@ -78,25 +78,25 @@ if (!is.macos) {
     },
     aboutMenuItem({
       icon: path.join(__dirname, 'static', 'icon.png'),
-      text: 'Created by __',
-    })
-  );
+      text: 'Created by Sundeep Kumar',
+    }),
+  )
 }
 
 const debugSubmenu = [
   {
     label: 'Show Settings',
     click() {
-      config.openInEditor();
+      config.openInEditor()
     },
   },
   {
     label: 'Show App Data',
     async click() {
       try {
-        await shell.openPath(app.getPath('userData'));
+        await shell.openPath(app.getPath('userData'))
       } catch (error) {
-        console.error('Failed to open app data directory:', error);
+        console.error('Failed to open app data directory:', error)
       }
     },
   },
@@ -106,24 +106,24 @@ const debugSubmenu = [
   {
     label: 'Delete Settings',
     click() {
-      config.clear();
-      app.relaunch();
-      app.quit();
+      config.clear()
+      app.relaunch()
+      app.quit()
     },
   },
   {
     label: 'Delete App Data',
     async click() {
       try {
-        await shell.trashItem(app.getPath('userData'));
-        app.relaunch();
-        app.quit();
+        await shell.trashItem(app.getPath('userData'))
+        app.relaunch()
+        app.quit()
       } catch (error) {
-        console.error('Failed to move app data to trash:', error);
+        console.error('Failed to move app data to trash:', error)
       }
     },
   },
-];
+]
 
 const macosTemplate = [
   appMenu([
@@ -131,7 +131,7 @@ const macosTemplate = [
       label: 'Preferences…',
       accelerator: 'Command+,',
       click() {
-        showPreferences();
+        showPreferences()
       },
     },
   ]),
@@ -162,7 +162,7 @@ const macosTemplate = [
     role: 'help',
     submenu: helpSubmenu,
   },
-];
+]
 
 // Linux and Windows
 const otherTemplate = [
@@ -179,7 +179,7 @@ const otherTemplate = [
         label: 'Preferences…',
         accelerator: 'Control+,',
         click() {
-          showPreferences();
+          showPreferences()
         },
       },
       {
@@ -200,15 +200,15 @@ const otherTemplate = [
     role: 'help',
     submenu: helpSubmenu,
   },
-];
+]
 
-const template = is.macos ? macosTemplate : otherTemplate;
+const template = is.macos ? macosTemplate : otherTemplate
 
 if (is.development) {
   template.push({
     label: 'Debug',
     submenu: debugSubmenu,
-  });
+  })
 }
 
-export default Menu.buildFromTemplate(template);
+export default Menu.buildFromTemplate(template)

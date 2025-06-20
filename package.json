@@ -1,14 +1,15 @@
 {
   "name": "all-in-one-desktop-app",
-  "productName": "MyAPP",
+  "productName": "All-in-One Desktop App",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
-  "description": "Generates production ready .exe, .dmg, .deb, etc. from a single codebase",
+  "description": "Cross-platform desktop application for generating native installers",
   "license": "MIT",
   "repository": "kumarsundeep/AllInOneDesktopApp",
   "author": {
-    "name": "Sundeep Kumar"
+    "name": "Sundeep Kumar",
+    "email": "sundeep@example.com"
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
@@ -41,7 +42,7 @@
     "releaseDraft": false
   },
   "build": {
-    "appId": "MyLLM",
+    "appId": "com.example.AllInOneDesktopApp",
     "mac": {
       "category": "public.app-category.desktop",
       "darkModeSupport": true
