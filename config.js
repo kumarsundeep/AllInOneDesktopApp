@@ -1,7 +1,7 @@
-'use strict';
-const Store = require('electron-store');
+import Store from 'electron-store';
 
-module.exports = new Store({
+// Simple configuration without advanced error handling
+export default new Store({
   defaults: {
     fallbackErr: '""',
   },

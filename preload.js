@@ -1,12 +1,20 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron')
 
+// Expose minimal safe API to renderer
 contextBridge.exposeInMainWorld('electronAPI', {
-  setHeaderText: (text) => {
-    document.querySelector('header p').textContent = text;
-  },
-});
+  // Minimal API if needed for other features
+})
 
-// Listen for header text updates from main process
+// Directly handle header text updates
 ipcRenderer.on('set-header-text', (event, text) => {
-  window.electronAPI.setHeaderText(text);
-});
+  try {
+    const headerTextElement = document.querySelector('header p')
+    if (headerTextElement) {
+      headerTextElement.textContent = text
+    } else {
+      console.warn('Header text element not found')
+    }
+  } catch (err) {
+    console.error('Error updating header text:', err)
+  }
+})

@@ -1,15 +1,19 @@
-'use strict';
-const path = require('path');
-const { app, Menu, shell, BrowserWindow } = require('electron');
-const {
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { app, Menu, shell, BrowserWindow } from 'electron';
+import {
   is,
   appMenu,
   aboutMenuItem,
   openUrlMenuItem,
   openNewGitHubIssue,
   debugInfo,
-} = require('electron-util');
-const config = require('./config.js');
+} from 'electron-util';
+import config from './config.js';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let preferencesWindow = null;
 
@@ -207,4 +211,4 @@ if (is.development) {
   });
 }
 
-module.exports = Menu.buildFromTemplate(template);
+export default Menu.buildFromTemplate(template);
