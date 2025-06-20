@@ -13,15 +13,29 @@ import config from './config.js'
 import menu from './menu.js'
 
 const { app, BrowserWindow, Menu, ipcMain } = electron
-
-// Disable cache to prevent access errors
-app.commandLine.appendSwitch('disable-http-cache')
 const { autoUpdater } = electronUpdater
 const { is } = electronUtil
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+// Create a temporary cache directory in the project folder
+const tempCachePath = path.join(__dirname, 'temp-cache')
+
+// Ensure cache directory exists
+if (!fs.existsSync(tempCachePath)) {
+  fs.mkdirSync(tempCachePath, { recursive: true })
+}
+
+// Configure cache settings
+app.commandLine.appendSwitch('disk-cache-dir', tempCachePath)
+app.commandLine.appendSwitch('disable-http-cache')
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
+
+// Set application paths to use temporary directories
+app.setPath('userData', path.join(__dirname, 'temp-userdata'))
+app.setPath('sessionData', path.join(__dirname, 'temp-sessiondata'))
 
 // Load environment variables
 dotenv.config()
@@ -187,15 +201,18 @@ const initApp = async () => {
   })
 
   const fallbackErr = config.get('fallbackErr')
-  // Sanitize user input by escaping HTML special characters
-  const sanitizedText = fallbackErr
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
-    .replace(/'/g, '&#039;')
+  // Only send error message if there's a non-empty error
+  if (fallbackErr) {
+    // Sanitize user input by escaping HTML special characters
+    const sanitizedText = fallbackErr
+      .replace(/&/g, '&')
+      .replace(/</g, '<')
+      .replace(/>/g, '>')
+      .replace(/"/g, '"')
+      .replace(/'/g, '&#039;')
 
-  mainWindow.webContents.send('set-header-text', `Something went wrong! ${sanitizedText}`)
+    mainWindow.webContents.send('set-header-text', `Something went wrong! ${sanitizedText}`)
+  }
 }
 
 initApp().catch((err) => {
