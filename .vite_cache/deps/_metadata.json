@@ -1,0 +1,15 @@
+{
+  "hash": "e9c67fa4",
+  "configHash": "55f4fd83",
+  "lockfileHash": "9c2b38ca",
+  "browserHash": "43abce96",
+  "optimized": {
+    "electron": {
+      "src": "../../node_modules/.vite-electron-renderer/electron.mjs",
+      "file": "electron.js",
+      "fileHash": "c337bd7a",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}
