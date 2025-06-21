@@ -2,6 +2,10 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    />
     <title>Preferences</title>
     <link rel="stylesheet" href="index.css">
     <style>
@@ -62,8 +66,8 @@
         </div>
     </div>
 
-    <script>
-        const { ipcRenderer } = require('electron');
+    <script type="module">
+        import { ipcRenderer } from 'electron';
         
         // Load saved preferences
         ipcRenderer.invoke('get-preferences').then(prefs => {
@@ -77,6 +81,9 @@
                 autoUpdate: document.getElementById('autoupdate').value
             };
             ipcRenderer.send('save-preferences', preferences);
+            
+            // Notify theme change
+            ipcRenderer.send('theme-changed', preferences.theme);
             window.close();
         });
         

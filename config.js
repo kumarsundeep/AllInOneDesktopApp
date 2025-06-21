@@ -4,5 +4,6 @@ import Store from 'electron-store'
 export default new Store({
   defaults: {
     fallbackErr: '',
+    theme: 'system', // 'light', 'dark', or 'system'
   },
 })

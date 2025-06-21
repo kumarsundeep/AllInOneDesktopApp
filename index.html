@@ -16,8 +16,30 @@
         <h1>All In One Desktop App <span id="app-version"></span></h1>
         <p id="header-text"></p>
       </header>
-      <section class="main"></section>
+      <section class="main">
+        <div id="memory-usage" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 5px; font-family: monospace; font-size: 14px;"></div>
+      </section>
       <footer></footer>
     </div>
+
+    <script>
+      // Apply theme on load
+      window.electronAPI.getTheme().then(theme => {
+        document.body.className = theme + '-theme'
+      })
+
+      // Listen for theme changes
+      window.electronAPI.on('theme-changed', (theme) => {
+        document.body.className = theme + '-theme'
+      })
+
+      // Listen for memory usage updates
+      window.electronAPI.onMemoryUsage((usage) => {
+        const memoryElement = document.getElementById('memory-usage')
+        if (memoryElement) {
+          memoryElement.textContent = `Memory: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`
+        }
+      })
+    </script>
   </body>
 </html>

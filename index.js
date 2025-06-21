@@ -91,11 +91,20 @@ if (!is.development || process.argv.includes('--test-update')) {
 let mainWindow
 
 const createMainWindow = async () => {
+  // Get primary display dimensions
+  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
+
+  // Calculate responsive window size (80% of screen width, 70% of screen height)
+  const responsiveWidth = Math.floor(width * 0.8)
+  const responsiveHeight = Math.floor(height * 0.7)
+
   const window_ = new BrowserWindow({
     title: app.name,
     show: false,
-    width: 1200,
-    height: 800,
+    width: responsiveWidth,
+    height: responsiveHeight,
+    minWidth: 800,
+    minHeight: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -118,25 +127,25 @@ const createMainWindow = async () => {
     const htmlPath = path.join(__dirname, 'index.html')
     console.log(`Attempting to load HTML file from: ${htmlPath}`)
 
-    // Check if file exists
-    if (!fs.existsSync(htmlPath)) {
-      throw new Error(`File not found: ${htmlPath}`)
-    }
-
-    // Use file:// protocol with loadURL
-    const fileUrl = `file:///${htmlPath.replace(/\\/g, '/')}`
-    console.log(`Loading HTML file using URL: ${fileUrl}`)
+    // Convert path to file URL
+    const fileUrl = `file:///${path.resolve(htmlPath).replace(/\\/g, '/')}`
+    console.log(`Loading URL: ${fileUrl}`)
 
     await window_.loadURL(fileUrl)
   } catch (err) {
-    console.error('Failed to load index.html:', err)
+    console.error('Failed to load HTML file:', err)
 
-    // Show detailed error in the window
+    // Show error in the window
     const errorPage = `
-      <!doctype html>
+      <!DOCTYPE html>
       <html>
       <head>
         <title>Application Error</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; }
+          h1 { color: #e00; }
+          pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+        </style>
       </head>
       <body>
         <h1>Failed to load application</h1>
@@ -188,6 +197,18 @@ const initApp = async () => {
   mainWindow = await createMainWindow()
 
   // Add IPC handlers for preferences
+  // Theme handling
+  ipcMain.handle('get-theme', () => config.get('theme', 'system'))
+
+  ipcMain.handle('set-theme', (event, theme) => {
+    config.set('theme', theme)
+    if (mainWindow) {
+      mainWindow.webContents.send('theme-changed', theme)
+    }
+    return theme
+  })
+
+  // Preferences handling
   ipcMain.handle('get-preferences', () => {
     return {
       theme: config.get('theme', 'system'),
@@ -198,6 +219,9 @@ const initApp = async () => {
   ipcMain.on('save-preferences', (event, prefs) => {
     config.set('theme', prefs.theme)
     config.set('autoUpdate', prefs.autoUpdate)
+    if (mainWindow) {
+      mainWindow.webContents.send('theme-changed', prefs.theme)
+    }
   })
 
   const fallbackErr = config.get('fallbackErr')
@@ -214,6 +238,19 @@ const initApp = async () => {
     mainWindow.webContents.send('set-header-text', `Something went wrong! ${sanitizedText}`)
   }
 }
+
+// Memory monitoring
+setInterval(() => {
+  const memoryUsage = process.memoryUsage()
+  if (mainWindow) {
+    mainWindow.webContents.send('memory-usage', {
+      rss: memoryUsage.rss,
+      heapTotal: memoryUsage.heapTotal,
+      heapUsed: memoryUsage.heapUsed,
+      external: memoryUsage.external,
+    })
+  }
+}, 5000) // Update every 5 seconds
 
 initApp().catch((err) => {
   console.error('Failed to initialize application:', err)

@@ -1,8 +1,27 @@
+:root {
+  --bg-light: #ffffff;
+  --text-light: #333333;
+  --header-bg-light: #f0f0f0;
+  --header-border-light: #dddddd;
+  
+  --bg-dark: #1e1e1e;
+  --text-dark: #f0f0f0;
+  --header-bg-dark: #2d2d2d;
+  --header-border-dark: #444444;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  background: transparent;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+  background: var(--bg-dark);
+  color: var(--text-dark);
 }
 
 /* Use OS default fonts */
@@ -30,6 +49,13 @@ header {
   margin-top: -125px;
   margin-left: -250px;
   text-align: center;
+  background-color: var(--header-bg-light);
+  border-bottom: 1px solid var(--header-border-light);
+}
+
+body.dark-theme header {
+  background-color: var(--header-bg-dark);
+  border-bottom: 1px solid var(--header-border-dark);
 }
 
 header h1 {

@@ -1,2 +1,3 @@
-2025/06/20-13:00:59.392 bac Creating DB D:\Projects\AllInOneDesktopApp\temp-sessiondata\Local Storage\leveldb since it was missing.
-2025/06/20-13:00:59.462 bac Reusing MANIFEST D:\Projects\AllInOneDesktopApp\temp-sessiondata\Local Storage\leveldb/MANIFEST-000001
+2025/06/21-11:26:29.327 754 Reusing MANIFEST D:\Projects\AllInOneDesktopApp\temp-sessiondata\Local Storage\leveldb/MANIFEST-000001
+2025/06/21-11:26:29.365 754 Recovering log #3
+2025/06/21-11:26:29.366 754 Reusing old log D:\Projects\AllInOneDesktopApp\temp-sessiondata\Local Storage\leveldb/000003.log 

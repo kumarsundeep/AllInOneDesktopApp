@@ -1,2 +1,3 @@
-2025/06/20-13:01:21.316 bac Creating DB D:\Projects\AllInOneDesktopApp\temp-sessiondata\Session Storage since it was missing.
-2025/06/20-13:01:21.354 bac Reusing MANIFEST D:\Projects\AllInOneDesktopApp\temp-sessiondata\Session Storage/MANIFEST-000001
+2025/06/21-11:27:09.347 2490 Reusing MANIFEST D:\Projects\AllInOneDesktopApp\temp-sessiondata\Session Storage/MANIFEST-000001
+2025/06/21-11:27:09.383 2490 Recovering log #3
+2025/06/21-11:27:09.384 2490 Reusing old log D:\Projects\AllInOneDesktopApp\temp-sessiondata\Session Storage/000003.log 

@@ -62,12 +62,22 @@
         }
       ]
     },
+    "win": {
+      "target": "nsis",
+      "icon": "static/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "linux": {
       "target": [
         "AppImage",
-        "deb"
+        "deb",
+        "rpm",
+        "snap"
       ],
-      "category": "desktop;Chat"
+      "category": "Utility"
     }
   }
 }
