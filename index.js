@@ -1,258 +1,99 @@
-import { fileURLToPath } from 'url'
-import path from 'path'
-import fs from 'fs'
-import dotenv from 'dotenv'
-import electron from 'electron'
-
-import electronUpdater from 'electron-updater'
-import electronUtil from 'electron-util'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import electronDebug from 'electron-debug'
+import electronContextMenu from 'electron-context-menu'
 import unhandled from 'electron-unhandled'
-import debug from 'electron-debug'
-import contextMenu from 'electron-context-menu'
-import config from './config.js'
-import menu from './menu.js'
+import pkg from 'electron-updater'
+const { autoUpdater } = pkg
+import Store from 'electron-store'
+import path from 'path'
+import os from 'os'
+import { fileURLToPath } from 'url'
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const { app, BrowserWindow, Menu, ipcMain } = electron
-const { autoUpdater } = electronUpdater
-const { is } = electronUtil
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-// Create a temporary cache directory in the project folder
-const tempCachePath = path.join(__dirname, 'temp-cache')
-
-// Ensure cache directory exists
-if (!fs.existsSync(tempCachePath)) {
-  fs.mkdirSync(tempCachePath, { recursive: true })
-}
-
-// Configure cache settings
-app.commandLine.appendSwitch('disk-cache-dir', tempCachePath)
-app.commandLine.appendSwitch('disable-http-cache')
-app.commandLine.appendSwitch('disable-gpu-shader-disk-cache')
-
-// Set application paths to use temporary directories
-app.setPath('userData', path.join(__dirname, 'temp-userdata'))
-app.setPath('sessionData', path.join(__dirname, 'temp-sessiondata'))
-
-// Load environment variables
-dotenv.config()
-
+// Initialize debugging and context menu
+electronDebug()
+electronContextMenu()
 unhandled()
-debug()
-contextMenu()
 
-// Note: Must match `build.appId` in package.json
-app.setAppUserModelId('com.company.AppName')
+// Initialize config store
+const store = new Store()
 
-// Enable auto-updates with certificate pinning
-if (!is.development || process.argv.includes('--test-update')) {
-  // Override auto-updater config for testing
-  if (process.argv.includes('--test-update')) {
-    autoUpdater.updateConfigPath = path.join(__dirname, 'dev-app-update.yml')
-  }
-  const FOUR_HOURS = 1000 * 60 * 60 * 4
-
-  // Certificate pinning configuration from environment variables
-  autoUpdater.publisherName = process.env.PUBLISHER_NAME
-  autoUpdater.verifyUpdateCodeSignature = true
-
-  // Add certificate fingerprints from environment variables
-  const pinnedFingerprints = new Set()
-  if (process.env.CERTIFICATE_FINGERPRINT_1)
-    pinnedFingerprints.add(process.env.CERTIFICATE_FINGERPRINT_1)
-  if (process.env.CERTIFICATE_FINGERPRINT_2)
-    pinnedFingerprints.add(process.env.CERTIFICATE_FINGERPRINT_2)
-
-  // Verify update signature against pinned fingerprints
-  autoUpdater.on(
-    'update-downloaded',
-    (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      const cert = event.certificates && event.certificates[0]
-      if (cert && pinnedFingerprints.has(cert.fingerprint256)) {
-        autoUpdater.quitAndInstall()
-      } else {
-        console.error('Certificate verification failed')
-        // Handle invalid certificate (e.g., show error to user)
-      }
-    },
-  )
-
-  setInterval(() => {
-    autoUpdater.checkForUpdates()
-  }, FOUR_HOURS)
-
-  autoUpdater.checkForUpdates()
-}
-
-// Prevent window from being garbage collected
+// Global reference to mainWindow
 let mainWindow
 
-const createMainWindow = async () => {
-  // Get primary display dimensions
-  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
-
-  // Calculate responsive window size (80% of screen width, 70% of screen height)
-  const responsiveWidth = Math.floor(width * 0.8)
-  const responsiveHeight = Math.floor(height * 0.7)
-
-  const window_ = new BrowserWindow({
-    title: app.name,
-    show: false,
-    width: responsiveWidth,
-    height: responsiveHeight,
-    minWidth: 800,
-    minHeight: 600,
+// Create the browser window
+async function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
       nodeIntegration: false,
+      contextIsolation: true,
       sandbox: true,
     },
+    show: false,
   })
 
-  window_.on('ready-to-show', () => {
-    window_.show()
-  })
-
-  window_.on('closed', () => {
-    // Dereference the window
-    // For multiple windows store them in an array
-    mainWindow = undefined
-  })
-
-  try {
-    const htmlPath = path.join(__dirname, 'index.html')
-    console.log(`Attempting to load HTML file from: ${htmlPath}`)
-
-    // Convert path to file URL
-    const fileUrl = `file:///${path.resolve(htmlPath).replace(/\\/g, '/')}`
-    console.log(`Loading URL: ${fileUrl}`)
-
-    await window_.loadURL(fileUrl)
-  } catch (err) {
-    console.error('Failed to load HTML file:', err)
-
-    // Show error in the window
-    const errorPage = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Application Error</title>
-        <style>
-          body { font-family: sans-serif; padding: 20px; }
-          h1 { color: #e00; }
-          pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
-        </style>
-      </head>
-      <body>
-        <h1>Failed to load application</h1>
-        <p>Error: ${err.message}</p>
-        <pre>${err.stack}</pre>
-      </body>
-      </html>
-    `
-
-    await window_.loadURL(`data:text/html,${encodeURIComponent(errorPage)}`)
+  // Load the app
+  if (process.env.NODE_ENV === 'development') {
+    // Use Vite dev server in development
+    await mainWindow.loadURL('http://localhost:5173')
+    mainWindow.webContents.openDevTools()
+  } else {
+    // Use built files in production
+    await mainWindow.loadFile(path.join(__dirname, 'dist/index.html'))
   }
 
-  return window_
-}
-
-// Prevent multiple instances of the app
-if (!app.requestSingleInstanceLock()) {
-  app.quit()
-}
-
-app.on('second-instance', () => {
-  if (mainWindow) {
-    if (mainWindow.isMinimized()) {
-      mainWindow.restore()
-    }
-
+  // Show window once content is loaded
+  mainWindow.once('ready-to-show', () => {
     mainWindow.show()
-  }
+    if (process.env.NODE_ENV === 'production') {
+      autoUpdater.checkForUpdatesAndNotify()
+    }
+  })
+
+  // Memory usage tracking
+  setInterval(() => {
+    const memoryUsage = process.memoryUsage()
+    mainWindow.webContents.send('memory-usage', memoryUsage)
+  }, 5000)
+}
+
+// Theme management
+ipcMain.handle('getTheme', () => {
+  return store.get('theme', 'light')
 })
 
+ipcMain.on('setTheme', (event, theme) => {
+  store.set('theme', theme)
+  mainWindow.webContents.send('theme-changed', theme)
+})
+
+// App lifecycle
+app.on('ready', createWindow)
+
 app.on('window-all-closed', () => {
-  if (!is.macos) {
+  if (process.platform !== 'darwin') {
     app.quit()
   }
 })
 
-app.on('activate', async () => {
-  if (!mainWindow) {
-    mainWindow = await createMainWindow()
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow()
   }
 })
 
-// Main application initialization
-const initApp = async () => {
-  await app.whenReady()
-  // Set application menu after creating main window
-  const appMenu = menu // Ensure menu is built
-  Menu.setApplicationMenu(appMenu)
-  mainWindow = await createMainWindow()
+// Auto-updater events
+autoUpdater.on('update-available', () => {
+  mainWindow.webContents.send('update-available')
+})
 
-  // Add IPC handlers for preferences
-  // Theme handling
-  ipcMain.handle('get-theme', () => config.get('theme', 'system'))
+autoUpdater.on('update-downloaded', () => {
+  mainWindow.webContents.send('update-downloaded')
+})
 
-  ipcMain.handle('set-theme', (event, theme) => {
-    config.set('theme', theme)
-    if (mainWindow) {
-      mainWindow.webContents.send('theme-changed', theme)
-    }
-    return theme
-  })
-
-  // Preferences handling
-  ipcMain.handle('get-preferences', () => {
-    return {
-      theme: config.get('theme', 'system'),
-      autoUpdate: config.get('autoUpdate', 'enabled'),
-    }
-  })
-
-  ipcMain.on('save-preferences', (event, prefs) => {
-    config.set('theme', prefs.theme)
-    config.set('autoUpdate', prefs.autoUpdate)
-    if (mainWindow) {
-      mainWindow.webContents.send('theme-changed', prefs.theme)
-    }
-  })
-
-  const fallbackErr = config.get('fallbackErr')
-  // Only send error message if there's a non-empty error
-  if (fallbackErr) {
-    // Sanitize user input by escaping HTML special characters
-    const sanitizedText = fallbackErr
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '>')
-      .replace(/"/g, '"')
-      .replace(/'/g, '&#039;')
-
-    mainWindow.webContents.send('set-header-text', `Something went wrong! ${sanitizedText}`)
-  }
-}
-
-// Memory monitoring
-setInterval(() => {
-  const memoryUsage = process.memoryUsage()
-  if (mainWindow) {
-    mainWindow.webContents.send('memory-usage', {
-      rss: memoryUsage.rss,
-      heapTotal: memoryUsage.heapTotal,
-      heapUsed: memoryUsage.heapUsed,
-      external: memoryUsage.external,
-    })
-  }
-}, 5000) // Update every 5 seconds
-
-initApp().catch((err) => {
-  console.error('Failed to initialize application:', err)
-  process.exit(1)
+ipcMain.on('restart-app', () => {
+  autoUpdater.quitAndInstall()
 })

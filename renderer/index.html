@@ -5,10 +5,9 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
     />
-
     <meta charset="utf-8" />
     <title>All In One Desktop App</title>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="/index.css" />
   </head>
   <body>
     <div class="container">
@@ -21,25 +20,6 @@
       </section>
       <footer></footer>
     </div>
-
-    <script>
-      // Apply theme on load
-      window.electronAPI.getTheme().then(theme => {
-        document.body.className = theme + '-theme'
-      })
-
-      // Listen for theme changes
-      window.electronAPI.on('theme-changed', (theme) => {
-        document.body.className = theme + '-theme'
-      })
-
-      // Listen for memory usage updates
-      window.electronAPI.on('memory-usage', (usage) => {
-        const memoryElement = document.getElementById('memory-usage')
-        if (memoryElement) {
-          memoryElement.textContent = `Memory: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`
-        }
-      })
-    </script>
+    <script type="module" src="/renderer.js"></script>
   </body>
 </html>
