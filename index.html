@@ -3,17 +3,17 @@
   <head>
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:"
     />
 
     <meta charset="utf-8" />
-    <title>All In One Desktop App</title>
+    <title id="app-title">All In One Desktop App</title>
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
     <div class="container">
       <header>
-        <h1>All In One Desktop App <span id="app-version"></span></h1>
+        <h1><span id="app-title-text">All In One Desktop App</span> <span id="app-version"></span></h1>
         <p id="header-text"></p>
       </header>
       <section class="main">
@@ -22,24 +22,7 @@
       <footer></footer>
     </div>
 
-    <script>
-      // Apply theme on load
-      window.electronAPI.getTheme().then(theme => {
-        document.body.className = theme + '-theme'
-      })
-
-      // Listen for theme changes
-      window.electronAPI.on('theme-changed', (theme) => {
-        document.body.className = theme + '-theme'
-      })
-
-      // Listen for memory usage updates
-      window.electronAPI.on('memory-usage', (usage) => {
-        const memoryElement = document.getElementById('memory-usage')
-        if (memoryElement) {
-          memoryElement.textContent = `Memory: ${Math.round(usage.heapUsed / 1024 / 1024)}MB`
-        }
-      })
-    </script>
+    <script src="./node_modules/i18next/index.js"></script>
+    <script src="./renderer.js"></script>
   </body>
 </html>

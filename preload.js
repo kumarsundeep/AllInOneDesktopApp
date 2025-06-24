@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
   send: (channel, ...args) => ipcRenderer.send(channel, ...args),
+  sendErrorReport: (reportData) => ipcRenderer.send('error-report', reportData),
 })
 
 // Directly handle header text updates

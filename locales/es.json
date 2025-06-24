@@ -1,0 +1,6 @@
+{
+  "appTitle": "Aplicación de Escritorio Todo en Uno",
+  "memoryUsage": "Memoria: {{usage}}MB",
+  "error.test": "Este es un error de prueba de la interfaz de informes de errores",
+  "error.generic": "Se produjo un error"
+}

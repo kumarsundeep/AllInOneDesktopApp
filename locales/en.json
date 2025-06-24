@@ -1,0 +1,6 @@
+{
+  "appTitle": "All In One Desktop App",
+  "memoryUsage": "Memory: {{usage}}MB",
+  "error.test": "This is a test error from the error reporting UI",
+  "error.generic": "An error occurred"
+}

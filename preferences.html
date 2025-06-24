@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'"
     />
     <title>Preferences</title>
     <link rel="stylesheet" href="index.css">
@@ -60,36 +60,21 @@
             </select>
         </div>
         
+        <div class="preference-item">
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="es">Español</option>
+            </select>
+        </div>
+        
         <div class="actions">
             <button id="cancel-btn">Cancel</button>
             <button id="save-btn">Save Preferences</button>
         </div>
     </div>
 
-    <script type="module">
-        import { ipcRenderer } from 'electron';
-        
-        // Load saved preferences
-        ipcRenderer.invoke('get-preferences').then(prefs => {
-            if (prefs.theme) document.getElementById('theme').value = prefs.theme;
-            if (prefs.autoUpdate) document.getElementById('autoupdate').value = prefs.autoUpdate;
-        });
-        
-        document.getElementById('save-btn').addEventListener('click', () => {
-            const preferences = {
-                theme: document.getElementById('theme').value,
-                autoUpdate: document.getElementById('autoupdate').value
-            };
-            ipcRenderer.send('save-preferences', preferences);
-            
-            // Notify theme change
-            ipcRenderer.send('theme-changed', preferences.theme);
-            window.close();
-        });
-        
-        document.getElementById('cancel-btn').addEventListener('click', () => {
-            window.close();
-        });
-    </script>
+    <script src="./preferences.js"></script>
 </body>
 </html>

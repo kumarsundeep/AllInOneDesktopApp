@@ -1,14 +1,46 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Set custom cache directory to fix permission issues
+const userDataPath = path.join(process.env.APPDATA, 'AllInOneDesktopApp')
+const gpuCachePath = path.join(userDataPath, 'GPUCache')
+
+// Create the directories if they don't exist
+try {
+  if (!fs.existsSync(userDataPath)) {
+    fs.mkdirSync(userDataPath, { recursive: true })
+  }
+  if (!fs.existsSync(gpuCachePath)) {
+    fs.mkdirSync(gpuCachePath, { recursive: true })
+  }
+} catch (err) {
+  console.error('Failed to create cache directories:', err)
+}
+
+// Set GPU cache directory via command line
+process.argv.push(`--gpu-disk-cache-dir=${gpuCachePath}`)
+
+// Now import electron
+import electron from 'electron'
+const { app, BrowserWindow, ipcMain } = electron
+
 import electronDebug from 'electron-debug'
 import electronContextMenu from 'electron-context-menu'
 import unhandled from 'electron-unhandled'
-import pkg from 'electron-updater'
-const { autoUpdater } = pkg
+import electronUpdater from 'electron-updater'
+const { autoUpdater } = electronUpdater
+
 import Store from 'electron-store'
-import path from 'path'
-import os from 'os'
-import { fileURLToPath } from 'url'
+import { Worker } from 'worker_threads'
+import { createMenu } from './menu.js'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Set user data path
+app.setPath('userData', userDataPath)
+console.log('Set user data directory to:', userDataPath)
+console.log('Set GPU cache directory to:', gpuCachePath)
 
 // Initialize debugging and context menu
 electronDebug()
@@ -23,6 +55,24 @@ let mainWindow
 
 // Create the browser window
 async function createWindow() {
+  // Create loading window immediately
+  const loadingWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    alwaysOnTop: true,
+    show: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+    },
+  })
+  await loadingWindow.loadFile(path.join(__dirname, 'loading.html'))
+
+  // Create main window in background
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -45,19 +95,25 @@ async function createWindow() {
     await mainWindow.loadFile(path.join(__dirname, 'dist/index.html'))
   }
 
-  // Show window once content is loaded
+  // When main window is ready, close loading window and show main window
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show()
-    if (process.env.NODE_ENV === 'production') {
-      autoUpdater.checkForUpdatesAndNotify()
-    }
+    // Add a short delay to ensure loading window has time to display
+    setTimeout(() => {
+      loadingWindow.close()
+      mainWindow.show()
+      if (process.env.NODE_ENV === 'production') {
+        autoUpdater.checkForUpdatesAndNotify()
+      }
+    }, 500)
   })
 
-  // Memory usage tracking
-  setInterval(() => {
-    const memoryUsage = process.memoryUsage()
-    mainWindow.webContents.send('memory-usage', memoryUsage)
-  }, 5000)
+  // Start memory worker
+  const memoryWorker = new Worker(path.join(__dirname, 'memoryWorker.js'))
+  memoryWorker.on('message', (memoryUsage) => {
+    if (mainWindow) {
+      mainWindow.webContents.send('memory-usage', memoryUsage)
+    }
+  })
 }
 
 // Theme management
@@ -70,8 +126,61 @@ ipcMain.on('setTheme', (event, theme) => {
   mainWindow.webContents.send('theme-changed', theme)
 })
 
+// Language preference handling
+ipcMain.handle('getLanguage', () => {
+  return store.get('language', 'en')
+})
+
+ipcMain.on('language-changed', (event, language) => {
+  store.set('language', language)
+  reloadTranslations(language)
+
+  // Notify all windows about language change
+  const windows = BrowserWindow.getAllWindows()
+  windows.forEach((window) => {
+    window.webContents.send('language-changed', language)
+  })
+})
+
+// Error reporting IPC handler
+ipcMain.on('error-report', (event, reportData) => {
+  console.error('Error report received:', reportData)
+  // TODO: Implement backend service integration
+  // sendToBackendService(reportData)
+})
+
+// Reload translations for new language
+function reloadTranslations(lang) {
+  try {
+    const localePath = path.join(__dirname, 'locales', `${lang}.json`)
+    const rawData = fs.readFileSync(localePath)
+    const translations = JSON.parse(rawData)
+    // TODO: Implement actual translation reloading logic
+    console.log(`Loaded ${Object.keys(translations).length} translations for ${lang}`)
+  } catch (err) {
+    console.error('Failed to reload translations:', err)
+  }
+}
+
+// Create error reporting window
+function createErrorWindow() {
+  const errorWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+    },
+  })
+  errorWindow.loadFile(path.join(__dirname, 'error-reporting.html'))
+}
+
 // App lifecycle
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+  createMenu(mainWindow)
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

@@ -17,4 +17,4 @@ module.exports = {
     'node/no-unpublished-require': 'off',
     'import/no-unresolved': 'off',
   },
-};
+}

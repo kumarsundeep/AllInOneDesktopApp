@@ -1,0 +1,6 @@
+{
+  "appTitle": "Application de Bureau Tout-en-Un",
+  "memoryUsage": "Mémoire: {{usage}}MB",
+  "error.test": "Ceci est une erreur de test de l'interface de rapport d'erreur",
+  "error.generic": "Une erreur est survenue"
+}
