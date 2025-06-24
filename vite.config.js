@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
           },
         },
         maxParallelFileOps: 4,
+        external: ['i18next'],
       },
       commonjsOptions: {
         exclude: [/\/node_modules\/electron-updater\/.*/],

@@ -1,3 +1,5 @@
+import i18next from 'i18next'
+
 // Initialize i18next
 i18next.init({
   lng: 'en',
