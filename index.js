@@ -92,7 +92,7 @@ async function createWindow() {
     mainWindow.webContents.openDevTools()
   } else {
     // Use built files in production
-    await mainWindow.loadFile(path.join(__dirname, 'dist/index.html'))
+    await mainWindow.loadFile(path.join(app.getAppPath(), 'dist/index.html'))
   }
 
   // When main window is ready, close loading window and show main window

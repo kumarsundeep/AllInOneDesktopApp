@@ -1,6 +1,6 @@
 {
   "name": "all-in-one-desktop-app",
-  "productName": "All-in-One Desktop App",
+  "productName": "All-In-One-Desktop-App",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
@@ -20,10 +20,11 @@
     "electron": "electron .",
     "dev": "concurrently -k \"npm run start\" \"npm run electron\"",
     "build": "vite build",
-    "dist": "npm run build && electron-builder --macos --linux --windows",
-    "dist:win": "npm run build && electron-builder --windows",
-    "dist:mac": "npm run build && electron-builder --macos",
-    "dist:linux": "npm run build && electron-builder --linux",
+    "dist": "npm run clean:dist && npm run build && electron-builder --macos --linux --windows",
+    "dist:win": "npm run clean:dist && npm run build && electron-builder --windows",
+    "dist:mac": "npm run clean:dist && npm run build && electron-builder --macos",
+    "dist:linux": "npm run clean:dist && npm run build && electron-builder --linux",
+    "clean:dist": "cleanup.cmd || exit 0",
     "release": "np",
     "test:update": "electron . --test-update"
   },
@@ -39,8 +40,10 @@
   },
   "devDependencies": {
     "concurrently": "^9.0.0",
+    "electron": "^30.0.0",
     "electron-builder": "^24.9.1",
     "np": "^7.6.2",
+    "rimraf": "^5.0.5",
     "vite": "^6.3.5",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.6",
@@ -51,7 +54,7 @@
     "releaseDraft": false
   },
   "build": {
-    "appId": "com.sundeep.AllInOneDesktopApp",
+    "appId": "com.example.AllInOneDesktopApp",
     "mac": {
       "category": "public.app-category.desktop",
       "darkModeSupport": true
